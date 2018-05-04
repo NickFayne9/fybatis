@@ -1,4 +1,4 @@
-package com.faynely.fybatis.statement;
+package com.faynely.fybatis.executor.statement;
 
 /**
  * SQL 语句处理器

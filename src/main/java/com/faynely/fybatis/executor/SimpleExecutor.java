@@ -1,8 +1,8 @@
 package com.faynely.fybatis.executor;
 
-import com.faynely.fybatis.parameter.ParameterHandler;
-import com.faynely.fybatis.result.ResultHandler;
-import com.faynely.fybatis.statement.StatementHandler;
+import com.faynely.fybatis.executor.parameter.ParameterHandler;
+import com.faynely.fybatis.executor.result.ResultHandler;
+import com.faynely.fybatis.executor.statement.StatementHandler;
 
 import java.sql.*;
 
