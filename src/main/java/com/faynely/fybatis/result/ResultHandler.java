@@ -1,4 +1,4 @@
-package com.faynely.fybatis.executor.result;
+package com.faynely.fybatis.result;
 
 
 import java.lang.reflect.Field;

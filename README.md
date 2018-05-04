@@ -68,4 +68,53 @@ fybatis 是一个从零写起的类 MyBatis ORM 框架。用于学习 MyBatis �
 
 接下来引出 v1.2.0 来解决上述缺点。
 
+# v1.2.0的设计
+
+针对以上的两个缺点，进一步改造代码。（其实，可以发现项目是越来越复杂，因为做的事情比较杂，需要做到单一职责和开闭原则，必然会生出好多类）
+
+1. 针对需要硬编码的 Mapper 的接口实现类，可以考虑通过 JDK 的动态代理来实现（不清楚动态代理的同学，之后会单独写一个项目来手动实现 JDK 的动态代理）。
+2. 针对对配置项的问题，可以新增一个 Configuration 类。目前流行两种形式的配置，一种是 XML，一种是 annotation。这里实现 annotation，不考虑 XML（因为当年被 Spring 的 applicationContext.xml 恶心到了，使用 Spring Boot 好太多了）
+
+其实这一步挺难的。这里梳理一下思路。
+1. 需要创建 Configuration 配置管理类和 MapperProxy 接口代理类
+2. 需要创建一个注解 @Select
+3. 因为 SqlSession 是唯一一个直接提供给用户操作的类，里面需要两个属性：configuration 和 executor。也需要两个方法，getMapper 和 selectOne。
+
+解释一下为什么 SqlSession 中需要有 selectOne 方法。
+1. 只有 SqlSession 拥有 Executor 对象操作数据库。
+2. Executor 如果放在 MapperProxy 中，会让 MapperProxy 不纯粹，因为它只是一个代理类而已。
+3. SqlSession 的意义本身就是数据库会话。本身可以操作数据库，所以 Executor 放在 SqlSession 中合情合理。
+
+下面再来看一段代码：
+
+```java
+SqlSession sqlSession = new SqlSession(new SimpleExecutor(), new Configuration());
+IStudentMapper studentMapper = sqlSession.getMapper(IStudentMapper.class);
+Student student = studentMapper.selectStuById(1);
+```
+
+来解释一下这段代码的调用逻辑。
+1. 第一行，将 Configuration 和 Executor 都传入 SqlSession 的构造方法。生成一个 SqlSession 实例。
+2. 第二行，调用 SqlSession 的 getMapper 方法，传入需要被代理的接口；接着调用 Configuration 的 getMapper 方法，接着就是 JDK 生成代理类，返回。
+3. 第三行，使用 JDK 生成的代理类，调用 selectStuById 方法，实际上会调用 MapperProxy 的 invoke 方法（这些都是动态代理的知识，不细说），而 MapperProxy 中的 invoke 方法最后调用 SqlSession 的 selectOne方法。
+4. 回到 SqlSession 中，会发现 1-3 步，从 SqlSession 开始，走过了 Configuration 和 MapperProxy 最后又回到了 SqlSession 中。这时，SqlSession 调用 Executor 的 query 方法，执行 SQL，返回结果。
+
+补充说明 MapperProxy 类中的 invoke 方法的一个判断条件：
+
+```java
+if(method.getDeclaringClass().getName().equals(interfaces.getClass().getDeclaringClass().getName())){
+    return sqlSession.selectOne();
+}
+```
+
+为什么需要这句判断呢？
+1. 因为这里的动态代理不是正常的动态代理。被代理的接口没有实现类。
+2. 也就是说 IStudentMapper 的 selectStuById 方法没有去实现。
+3. 当代理的方法来自 IStudentMapper，我们需要手动的让它去调用数据库的相关方法。否则会找不到方法。
+
+继续补充说明为什么绕了一大圈，又回到了 SqlSession？
+1. 结合 SqlSession 为什么需要 selectOne 方法说明。
+2. 其实就是为了动态代理 IStudentMapper 所做出的牺牲。虽然有点绕，但是层次清晰，而且不用自己手动写实现类了。优点远大于缺点。
+
+# v1.2.0的思考
 

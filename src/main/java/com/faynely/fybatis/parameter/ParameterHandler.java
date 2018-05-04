@@ -1,4 +1,4 @@
-package com.faynely.fybatis.executor.parameter;
+package com.faynely.fybatis.parameter;
 
 /**
  * SQL 参数处理器

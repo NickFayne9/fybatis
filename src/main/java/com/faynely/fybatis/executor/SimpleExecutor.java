@@ -1,8 +1,8 @@
 package com.faynely.fybatis.executor;
 
-import com.faynely.fybatis.executor.parameter.ParameterHandler;
-import com.faynely.fybatis.executor.result.ResultHandler;
-import com.faynely.fybatis.executor.statement.StatementHandler;
+import com.faynely.fybatis.parameter.ParameterHandler;
+import com.faynely.fybatis.result.ResultHandler;
+import com.faynely.fybatis.statement.StatementHandler;
 
 import java.sql.*;
 
@@ -10,16 +10,16 @@ import java.sql.*;
  * 简单的 SQL 执行器
  * @author NickFayne 2018-05-04 10:16
  */
-public class SimpleExecutor<T> implements Executor {
+public class SimpleExecutor implements Executor {
 
     private ParameterHandler parameterHandler;
     private StatementHandler statementHandler;
     private ResultHandler resultHandler;
 
-    public SimpleExecutor(ParameterHandler parameterHandler, StatementHandler statementHandler, ResultHandler resultHandler) {
-        this.parameterHandler = parameterHandler;
-        this.statementHandler = statementHandler;
-        this.resultHandler = resultHandler;
+    public SimpleExecutor() {
+        this.parameterHandler = new ParameterHandler();
+        this.statementHandler = new StatementHandler();
+        this.resultHandler = new ResultHandler();
     }
 
     /**
@@ -28,7 +28,7 @@ public class SimpleExecutor<T> implements Executor {
      * @param parameter
      * @return
      */
-    public Object query(String statement, Object parameter, Class clazz) {
+    public <T> T query(String statement, Object parameter, Class<T> clazz) {
         Connection connection = null;
         PreparedStatement preparedStatement = null;
         T resultObj = null;
@@ -65,4 +65,5 @@ public class SimpleExecutor<T> implements Executor {
         }
         return resultObj;
     }
+
 }
