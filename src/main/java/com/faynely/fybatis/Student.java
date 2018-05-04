@@ -8,7 +8,6 @@ public class Student {
     private Integer id;
     private String name;
     private Integer age;
-    private String gender;
     private Integer classId;
 
     public Integer getId() {
@@ -35,14 +34,6 @@ public class Student {
         this.age = age;
     }
 
-    public String getGender() {
-        return gender;
-    }
-
-    public void setGender(String gender) {
-        this.gender = gender;
-    }
-
     public Integer getClassId() {
         return classId;
     }
@@ -57,7 +48,6 @@ public class Student {
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", age=" + age +
-                ", gender='" + gender + '\'' +
                 ", classId=" + classId +
                 '}';
     }
