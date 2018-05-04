@@ -7,7 +7,7 @@ package com.faynely.fybatis;
 public class FybatisTest {
     public static void main(String[] args) {
         IStudentMapper studentMapper = SqlSession.getStudentMapper();
-        Student student = studentMapper.selectStuById(1);
+        Student student = studentMapper.selectStuById("select * from student where id = %d", 1);
 
         System.out.println(student);
     }
