@@ -30,12 +30,14 @@ public class MapperProxy implements InvocationHandler {
      */
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         String methodName = method.getDeclaringClass().getName();
+        //如果是 Mapper 接口中的方法，那就直接走数据库操作
         if(!methodName.equals(Object.class.getName())){
             Map<String, List<Map<String, Map<String, Object>>>> mapperMathedMapList = Configuration.getMapperMethodMapList();
             String sql = String.valueOf(mapperMathedMapList.get("com.faynely.fybatis.IStudentMapper").get(0).get("selectStuById").get("sql"));
             Class clazz = (Class) mapperMathedMapList.get("com.faynely.fybatis.IStudentMapper").get(0).get("selectStuById").get("returnType");
             return sqlSession.selectOne(sql, args[0], clazz);
         }
-        return null;
+        //处理 Object 类中以及其父类中的方法，按正常的流程走
+        return method.invoke(this, args);
     }
 }
