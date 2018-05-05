@@ -12,7 +12,7 @@ fybatis 是一个从零写起的类 MyBatis ORM 框架。用于学习 MyBatis �
 *  [v1.1.0 实现过程](#v1.1.0-实现过程)
 *  [v1.1.0 的优缺点](#v1.1.0-的优缺点)
 *  [v1.2.0 的设计](#v1.2.0-的设计)
-*  [v1.2.0 的问题](#v1.2.0-的问题)
+*  [v1.2.0 的优缺点](#v1.2.0-的优缺点)
 
 # v1.0.0 版本的思考
 
@@ -118,5 +118,20 @@ if(method.getDeclaringClass().getName().equals(interfaces.getClass().getDeclarin
 1. 结合 SqlSession 为什么需要 selectOne 方法说明。
 2. 其实就是为了动态代理 IStudentMapper 所做出的牺牲。虽然有点绕，但是层次清晰，而且不用自己手动写实现类了。优点远大于缺点。
 
-# v1.2.0 的问题
+# v1.2.0 的优缺点
+
+为什么说 v1.2.0 几乎是一个里程碑版本？
+1. 可以通过注解的形式，进行配置 Mapper 接口（也就是我们要操作数据库的接口），不需要再手写其实现类。
+2. 增加了 Configuration 类，将配置的动作全都交给了这个类，再次体现了单一职责。
+
+为什么说 v1.2.0 是几乎，而不是完全是一个里程碑？
+1. 因为我太菜了，写了一天，才写出这个效果，还是没能达到上生产环境的要求，而只是一个 demo 级别的产物。
+2. 并没有将我们自己的 Mapper 接口的路径提取出来，还是得手动设置。MyBatis 是可以通过配置的，而我们还没有这个功能。
+3. 在 Configuration 进行配置加载的时候，有一个 mapperMethodMapList，这个 Map 描述的配置有限，不清晰。目前是这个结构：
+```json
+{"com.faynely,fybatis.IStudentMapper" -> ["selectStuById" -> {"sql", "select * from student where id = %d"},{"parameter", 1}, {"returnType" -> "com.faynely.fybatis.Student"}, ...]}
+```
+看着很累，需要再次用到面向对象的思想，将其分离出几个对象来描述。
+
+将上述的问题解决了，就是我们的 v1.2.1。其实也就是小功能的提升，大的框架都已经完成了，就差最后一步。
 
