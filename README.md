@@ -125,13 +125,17 @@ if(method.getDeclaringClass().getName().equals(interfaces.getClass().getDeclarin
 2. 增加了 Configuration 类，将配置的动作全都交给了这个类，再次体现了单一职责。
 
 为什么说 v1.2.0 是几乎，而不是完全是一个里程碑？
-1. 因为我太菜了，写了一天，才写出这个效果，还是没能达到上生产环境的要求，而只是一个 demo 级别的产物。
-2. 并没有将我们自己的 Mapper 接口的路径提取出来，还是得手动设置。MyBatis 是可以通过配置的，而我们还没有这个功能。
-3. 在 Configuration 进行配置加载的时候，有一个 mapperMethodMapList，这个 Map 描述的配置有限，不清晰。目前是这个结构：
-```json
+* 因为我太菜了，写了一天，才写出这个效果，还是没能达到上生产环境的要求，而只是一个 demo 级别的产物。
+* MapperProxy 类中的 invoke 方法中，获取接口对应的 SQL 语句和返回值类型时是写死的。 
+```java
+String sql = String.valueOf(mapperMathedMapList.get("com.faynely.fybatis.IStudentMapper").get(0).get("selectStuById").get("sql"));
+Class clazz = (Class) mapperMathedMapList.get("com.faynely.fybatis.IStudentMapper").get(0).get("selectStuById").get("returnType");
+```
+* 在 Configuration 进行配置加载的时候，有一个 mapperMethodMapList，这个 Map 描述的配置有限，不清晰。目前是这个结构：
+```text
 {"com.faynely,fybatis.IStudentMapper" -> ["selectStuById" -> {"sql", "select * from student where id = %d"},{"parameter", 1}, {"returnType" -> "com.faynely.fybatis.Student"}, ...]}
 ```
-看着很累，需要再次用到面向对象的思想，将其分离出几个对象来描述。
 
+看着很累，需要再次用到面向对象的思想，将其分离出几个对象来描述。
 将上述的问题解决了，就是我们的 v1.2.1。其实也就是小功能的提升，大的框架都已经完成了，就差最后一步。
 
