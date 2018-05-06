@@ -142,3 +142,4 @@ Class clazz = (Class) mapperMathedMapList.get("com.faynely.fybatis.IStudentMappe
 # v1.2.1 的设计思路
 
 
+
