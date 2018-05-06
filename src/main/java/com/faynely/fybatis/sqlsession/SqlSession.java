@@ -36,7 +36,7 @@ public class SqlSession {
      * @param <E>
      * @return
      */
-    public <E> E selectOne(String statement, Object parameter, Class<E> clazz){
+    public <E> E selectOne(String statement, Object[] parameter, Class<E> clazz){
         return executor.query(statement, parameter, clazz);
     }
 }

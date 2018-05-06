@@ -6,7 +6,7 @@ package com.faynely.fybatis.executor.statement;
  */
 public class StatementHandler {
 
-    public String processStatement(String statement, Object param) {
+    public String processStatement(String statement, Object[] param) {
         return String.format(statement, param);
     }
 }

@@ -5,5 +5,5 @@ package com.faynely.fybatis.executor;
  * @author NickFayne 2018-05-04 10:10
  */
 public interface Executor {
-    <T> T query(String statement, Object parameter, Class<T> clazz);
+    <T> T query(String statement, Object[] parameter, Class<T> clazz);
 }
