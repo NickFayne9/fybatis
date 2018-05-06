@@ -33,6 +33,7 @@ public class MapperProxy implements InvocationHandler {
         //如果是 Mapper 接口中的方法，那就直接走数据库操作
         if(!methodName.equals(Object.class.getName())){
             Map<String, List<Map<String, Map<String, Object>>>> mapperMathedMapList = Configuration.getMapperMethodMapList();
+            //TODO: 不应该写死，接下来需要修改成根据配置获取
             String sql = String.valueOf(mapperMathedMapList.get("com.faynely.fybatis.IStudentMapper").get(0).get("selectStuById").get("sql"));
             Class clazz = (Class) mapperMathedMapList.get("com.faynely.fybatis.IStudentMapper").get(0).get("selectStuById").get("returnType");
             return sqlSession.selectOne(sql, args[0], clazz);
