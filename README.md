@@ -133,7 +133,7 @@ Class clazz = (Class) mapperMathedMapList.get("com.faynely.fybatis.IStudentMappe
 ```
 * 在 Configuration 进行配置加载的时候，有一个 mapperMethodMapList，这个 Map 描述的配置有限，不清晰。目前是这个结构：
 ```text
-{"com.faynely,fybatis.IStudentMapper" -> ["selectStuById" -> {"sql", "select * from student where id = %d"},{"parameter", 1}, {"returnType" -> "com.faynely.fybatis.Student"}, ...]}
+{"com.faynely,fybatis.IStudentMapper" -> ["selectStuById" -> {"sql", "select * from student where id = %d"}, {"returnType" -> "com.faynely.fybatis.Student"}, ...]}
 ```
 
 看着很累，需要再次用到面向对象的思想，将其分离出几个对象来描述。
@@ -141,5 +141,28 @@ Class clazz = (Class) mapperMathedMapList.get("com.faynely.fybatis.IStudentMappe
 
 # v1.2.1 的设计思路
 
+针对上面的这个问题。
+> MapperProxy 类中的 invoke 方法中，获取接口对应的 SQL 语句和返回值类型时是写死的。 
+
+那么这样就需要在 MapperProxy 类加一个当前操作的 Mapper 接口的 Class 对象。这样可以通过 Class 对象去之前的 mapperMethodMapList 中获取 sql 和 returnType。
+
+针对这个问题。
+> 在 Configuration 进行配置加载的时候，有一个 mapperMethodMapList，这个 Map 描述的配置有限，不清晰
+
+这样的结构一个不清晰，一个不合理。这个 Map 需要解决的就是把 Mapper 接口的*全限定名*加*方法名*和方法对应的 SQL 和返回类型做一个映射。
+
+可以优化成如下结构：
+```text
+{"com.faynely.fybatis.IStudentMapper.selectStuById" -> {"select * from student where id = %d", "com.faynely.fybatis.Student"} }
+```
+
+这个 Map 的值可以作为一个对象，我们叫做 MapperData。
+
+```java
+public class MapperData{
+    private String sql;
+    private Class returnType;
+}
+```
 
 

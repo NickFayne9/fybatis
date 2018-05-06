@@ -2,6 +2,7 @@ package com.faynely.fybatis.configuration;
 
 import com.faynely.fybatis.annotation.Repository;
 import com.faynely.fybatis.annotation.Select;
+import com.faynely.fybatis.binding.MapperData;
 import com.faynely.fybatis.binding.MapperProxy;
 import com.faynely.fybatis.sqlsession.SqlSession;
 
@@ -25,18 +26,20 @@ public class Configuration {
 
     /**
      * 存放 Mapper 接口中，接口全路径名与方法名与注解中的 SQL 语句的映射关系
-     * 比如：{"com.faynely,fybatis.IStudentMapper" -> ["selectStuById" -> {"sql", "select * from student where id = %d"},{"parameter", 1}, {"returnType" -> "com.faynely.fybatis.Student"}, ...]}
+     * 比如：{{"com.faynely.fybatis.IStudentMapper.selectStuById" -> {"select * from student where id = %d", "com.faynely.fybatis.Student"} }
+     *      {"select * from student where id = %d", "com.faynely.fybatis.Student"} 这个抽象为 MapperData 对象
+     *  也就是 key 为接口全限定名 + 方法名，value 为 MapperData 对象，MapperData 对象中保存了 SQL 和 ReturnType
      */
-    private static Map<String, List<Map<String, Map<String, Object>>>> mapperMethodMapList = new HashMap<String, List<Map<String, Map<String, Object>>>>();
+    private static Map<String, MapperData> mapperMethodMap = new HashMap<>();
 
     /**
      * 初始化方法
      * 1. 获取被 @Repository 修饰的类
      * 2. 获取被 @Select 修饰的方法，取出 SQL 语句
-     * 3. 组装成 Map，存至 mapperMethodMapList
+     * 3. 组装成 Map，存至 mapperMethodMap
      * 4. 将 mapperProxy 赋值
      */
-    static  {
+    static {
         try {
             scanBase("com.faynely.fybatis");
             filter();
@@ -58,26 +61,19 @@ public class Configuration {
                 Class interfaceClazz = Class.forName(className);
                 if(interfaceClazz.isAnnotationPresent(Repository.class)){
                     Method[] methods = interfaceClazz.getDeclaredMethods();
-                    List<Map<String, Map<String, Object>>> methodList = new ArrayList<Map<String, Map<String, Object>>>();
-
                     for(Method perMethod : methods){
-                        Map<String, Map<String, Object>> methodMap = new HashMap<String, Map<String, Object>>();
-                        Map<String, Object> objMap = new HashMap<String, Object>();
-
                         String methodName = perMethod.getName();
-
+                        //组装 key
+                        String key = className + "." + methodName;
+                        //获取 SQL
                         String sql = perMethod.getAnnotation(Select.class).value();
-                        objMap.put("sql", sql);
-
+                        //获取 returnType
                         Class returnType = perMethod.getReturnType();
-                        objMap.put("returnType", returnType);
-
-                        methodMap.put(methodName, objMap);
-
-                        methodList.add(methodMap);
+                        //组装 value
+                        MapperData mapperData = new MapperData(sql, returnType);
+                        //保存至 Map 中
+                        mapperMethodMap.put(key, mapperData);
                     }
-
-                    mapperMethodMapList.put(className, methodList);
                 }else{
                     continue;
                 }
@@ -107,12 +103,12 @@ public class Configuration {
         }
     }
 
-    public static Map<String, List<Map<String, Map<String, Object>>>> getMapperMethodMapList() {
-        return mapperMethodMapList;
+    public static Map<String, MapperData> getMapperMethodMap() {
+        return mapperMethodMap;
     }
 
-    public static void setMapperMethodMapList(Map<String, List<Map<String, Map<String, Object>>>> mapperMethodMapListReq) {
-        mapperMethodMapList = mapperMethodMapListReq;
+    public static void setMapperMethodMap(Map<String, MapperData> mapperMethodMapListReq) {
+        mapperMethodMap = mapperMethodMapListReq;
     }
 
     /**
@@ -124,6 +120,6 @@ public class Configuration {
     public <T> T getMapper(Class<T> clazz, SqlSession sqlSession){
         return (T) Proxy.newProxyInstance(this.getClass().getClassLoader(),
                 new Class[]{clazz},
-                new MapperProxy(sqlSession));
+                new MapperProxy(sqlSession, clazz));
     }
 }
