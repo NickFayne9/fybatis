@@ -139,3 +139,6 @@ Class clazz = (Class) mapperMathedMapList.get("com.faynely.fybatis.IStudentMappe
 看着很累，需要再次用到面向对象的思想，将其分离出几个对象来描述。
 将上述的问题解决了，就是我们的 v1.2.1。其实也就是小功能的提升，大的框架都已经完成了，就差最后一步。
 
+# v1.2.1 的设计思路
+
+
