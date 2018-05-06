@@ -11,4 +11,7 @@ import com.faynely.fybatis.annotation.Select;
 public interface IStudentMapper {
     @Select("select * from student where id = %d")
     Student selectStuById(Integer id);
+
+    @Select("select * from student where id = %d and name = '%s'")
+    Student selectStuByIdAndName(Integer id, String name);
 }

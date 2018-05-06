@@ -47,7 +47,7 @@ public class MapperProxy<T> implements InvocationHandler {
 
             String sql = mapperData.getSql();
             Class clazz = mapperData.getReturnType();
-            return sqlSession.selectOne(sql, args[0], clazz);
+            return sqlSession.selectOne(sql, args, clazz);
         }
         //处理 Object 类中以及其父类中的方法，按正常的流程走
         return method.invoke(this, args);

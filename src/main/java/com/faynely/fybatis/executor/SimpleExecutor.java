@@ -28,7 +28,7 @@ public class SimpleExecutor implements Executor {
      * @param parameter
      * @return
      */
-    public <T> T query(String statement, Object parameter, Class<T> clazz) {
+    public <T> T query(String statement, Object[] parameter, Class<T> clazz) {
         Connection connection = null;
         PreparedStatement preparedStatement = null;
         T resultObj = null;
@@ -37,7 +37,7 @@ public class SimpleExecutor implements Executor {
             connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/fybatis?useUnicode=true&characterEncoding=utf-8&useSSL=false&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC", "root", "123456");
 
             //处理参数
-            Object param = parameterHandler.processParameter(parameter);
+            Object[] param = parameterHandler.processParameter(parameter);
             //拼接 SQL
             String sql = statementHandler.processStatement(statement, param);
             //处理返回结果
@@ -52,13 +52,17 @@ public class SimpleExecutor implements Executor {
         } finally {
             try {
                 //关闭语句
-                preparedStatement.close();
+                if(preparedStatement != null){
+                    preparedStatement.close();
+                }
             } catch (SQLException e) {
                 e.printStackTrace();
             }
             try {
                 //关闭连接
-                connection.close();
+                if(connection != null){
+                    connection.close();
+                }
             } catch (SQLException e) {
                 e.printStackTrace();
             }

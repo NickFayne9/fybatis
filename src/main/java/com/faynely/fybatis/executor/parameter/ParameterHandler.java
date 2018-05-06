@@ -6,7 +6,7 @@ package com.faynely.fybatis.executor.parameter;
  */
 public class ParameterHandler {
 
-    public Object processParameter(Object parameter){
+    public Object[] processParameter(Object[] parameter){
         return parameter;
     }
 }
