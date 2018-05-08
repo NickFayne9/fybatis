@@ -1,6 +1,7 @@
 package com.faynely.fybatis.sqlsession;
 
 import com.faynely.fybatis.configuration.Configuration;
+import com.faynely.fybatis.executor.CachingExecutor;
 import com.faynely.fybatis.executor.SimpleExecutor;
 
 /**
@@ -10,6 +11,6 @@ import com.faynely.fybatis.executor.SimpleExecutor;
 public class SqlSessionFactory {
 
     public static SqlSession newInstance(){
-        return new SqlSession(new SimpleExecutor(), new Configuration());
+        return new SqlSession(new CachingExecutor(new SimpleExecutor()), new Configuration());
     }
 }
