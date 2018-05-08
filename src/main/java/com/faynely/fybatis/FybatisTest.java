@@ -16,10 +16,19 @@ public class FybatisTest {
         SqlSession sqlSession = SqlSessionFactory.newInstance();
         IStudentMapper studentMapper = sqlSession.getMapper(IStudentMapper.class);
 
+        long startTime = System.currentTimeMillis();
         Student student = studentMapper.selectStuById(1);
         System.out.println(student);
+        System.out.println("cost: " + (System.currentTimeMillis() - startTime));
 
+        startTime = System.currentTimeMillis();
         student = studentMapper.selectStuByIdAndName(1, "小明");
         System.out.println(student);
+        System.out.println("cost: " + (System.currentTimeMillis() - startTime));
+
+        startTime = System.currentTimeMillis();
+        student = studentMapper.selectStuByIdAndName(1, "小明");
+        System.out.println(student);
+        System.out.println("cost: " + (System.currentTimeMillis() - startTime));
     }
 }
