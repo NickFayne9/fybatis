@@ -4,16 +4,17 @@ import com.faynely.fybatis.annotation.Repository;
 import com.faynely.fybatis.annotation.Select;
 import com.faynely.fybatis.binding.MapperData;
 import com.faynely.fybatis.binding.MapperProxy;
+import com.faynely.fybatis.executor.Executor;
+import com.faynely.fybatis.executor.ExecutorFactory;
+import com.faynely.fybatis.plugin.Plugin;
+import com.faynely.fybatis.plugin.PluginProxy;
 import com.faynely.fybatis.sqlsession.SqlSession;
 
 import java.io.File;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 配置类
@@ -21,8 +22,7 @@ import java.util.Map;
  */
 public class Configuration {
 
-
-    private static List<String> classNameList = new ArrayList<String>();
+    private final static List<String> classNameList = new ArrayList<String>();
 
     /**
      * 存放 Mapper 接口中，接口全路径名与方法名与注解中的 SQL 语句的映射关系
@@ -30,7 +30,12 @@ public class Configuration {
      *      {"select * from student where id = %d", "com.faynely.fybatis.Student"} 这个抽象为 MapperData 对象
      *  也就是 key 为接口全限定名 + 方法名，value 为 MapperData 对象，MapperData 对象中保存了 SQL 和 ReturnType
      */
-    private static Map<String, MapperData> mapperMethodMap = new HashMap<>();
+    private final static Map<String, MapperData> mapperMethodMap = new HashMap<>();
+
+    /**
+     * 获取 plugin 类的实例
+     */
+    private final static List<Plugin> pluginList = new ArrayList<>();
 
     /**
      * 初始化方法
@@ -42,16 +47,17 @@ public class Configuration {
     static {
         try {
             scanBase("com.faynely.fybatis");
-            filter();
+            registerMapperInterfaces();
+            registerPlugin();
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
     /**
-     * 过滤所有类中包含 @Reposity 注解的类和其中的 @Select
+     * 注册用户所有自定义的 Mapper 接口
      */
-    private static void filter(){
+    private static void registerMapperInterfaces(){
         if(classNameList.size() == 0){
             return ;
         }
@@ -85,6 +91,30 @@ public class Configuration {
     }
 
     /**
+     * 注册用户所有自定义的 PluginProxy
+     */
+    private static void registerPlugin(){
+        if(classNameList.size() == 0){
+            return ;
+        }
+
+        for(String className : classNameList){
+            try{
+                Class clazz = Class.forName(className);
+                if(clazz.isAnnotationPresent(com.faynely.fybatis.annotation.Plugin.class)){
+                    pluginList.add((Plugin) clazz.newInstance());
+                }
+            }catch (ClassNotFoundException e){
+                e.printStackTrace();
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            } catch (InstantiationException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    /**
      * 获取指定包名下的类名
      */
     private static void scanBase(String basePackages) throws Exception{
@@ -104,12 +134,13 @@ public class Configuration {
         }
     }
 
-    public static Map<String, MapperData> getMapperMethodMap() {
-        return mapperMethodMap;
+    public static List<Plugin> getPluginSet() {
+        return pluginList;
     }
 
-    public static void setMapperMethodMap(Map<String, MapperData> mapperMethodMapListReq) {
-        mapperMethodMap = mapperMethodMapListReq;
+
+    public static Map<String, MapperData> getMapperMethodMap() {
+        return mapperMethodMap;
     }
 
     /**
@@ -122,5 +153,23 @@ public class Configuration {
         return (T) Proxy.newProxyInstance(this.getClass().getClassLoader(),
                 new Class[]{clazz},
                 new MapperProxy(sqlSession, clazz));
+    }
+
+    /**
+     * 将 Plugin 作为 Executor 的代理
+     * @param executorType
+     * @return
+     */
+    public Executor newExecutor(ExecutorFactory.ExecutorType executorType){
+        Executor executor = ExecutorFactory.newInstance(executorType.name());
+
+        if(pluginList.isEmpty()){
+
+        }else{
+            for(Plugin plugin : pluginList){
+                executor = (Executor) plugin.wrap(executor);
+            }
+        }
+        return executor;
     }
 }

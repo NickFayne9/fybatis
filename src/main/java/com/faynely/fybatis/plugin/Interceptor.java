@@ -1,9 +1,0 @@
-package com.faynely.fybatis.plugin;
-
-/**
- * 插件接口
- * @author NickFayne 2018-05-09 10:16
- */
-public interface Interceptor {
-
-}
