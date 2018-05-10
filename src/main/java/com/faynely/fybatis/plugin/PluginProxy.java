@@ -39,7 +39,6 @@ public class PluginProxy implements InvocationHandler {
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        Class clazz = method.getDeclaringClass();
         if(pluginMethodSet.contains(method.getName())){
             return interceptor.intercept(new Invocation(target, method, args));
         }

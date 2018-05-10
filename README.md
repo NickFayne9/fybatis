@@ -209,3 +209,23 @@ plugin 的作用和拦截器一样。作用于在 Executor 操作数据库时。
 > 增加 Executor 缓存的功能。（针对同一条语句，在一个 session 中进行缓存）
 
 对 Ececutor 的子类做拓展，也就是用装饰器模式，增加一个支持缓存的 Executor。
+
+## 插件的设计思想
+
+作用：插件的作用在于 Executor 执行数据库语句前做额外的操作。
+
+如何实现：使用动态代理，对 Executor 进行多重动态代理。
+
+运行流程：
+1. 通过 PluginProxy.wrap() 生成 Executor 动态代理对象，其中 InvocationHandler 为 new PluginProxy(目标对象， 插件)
+2. 这样生成的代理类，调用时，肯定会执行 InvocationHandler 中的 invoke 方法，也就是 PluginProxy 中的 invoke 方法。
+3. 在 invoke 方法中调用插件的拦截方法，并在插件拦截方法中，传入目标对象的实例，方法和参数，进行调用目标对象需要执行的方法。
+
+举例：（若有 PluginA 和 PluginB 两个插件。）
+
+1. 首先对 Executor 生成代理类。
+第一次生成，其中 PluginProxy(Executor 对象， PluginA)
+第二次生成，其中 PluginProxy(第一次生成的代理类， PLuginB)
+
+2. 调用时，拿到第二次生成的代理类，执行 invoke 方法后，进入 PluginB 的拦截方法中，执行拦截方法代码，回调反射执行第一次生成的代理类的方法。
+3. 这时再次进入 invoke 方法，继而进入 PluginA 的拦截方法中，执行拦截方法代码，回调 Executor 类对应的方法。
