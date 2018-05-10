@@ -26,9 +26,9 @@ public class FybatisTest {
         System.out.println(student);
         System.out.println("cost: " + (System.currentTimeMillis() - startTime));
 
-        startTime = System.currentTimeMillis();
-        student = studentMapper.selectStuByIdAndName(1, "小明");
-        System.out.println(student);
-        System.out.println("cost: " + (System.currentTimeMillis() - startTime));
+//        startTime = System.currentTimeMillis();
+//        student = studentMapper.selectStuByIdAndName(1, "小明");
+//        System.out.println(student);
+//        System.out.println("cost: " + (System.currentTimeMillis() - startTime));
     }
 }

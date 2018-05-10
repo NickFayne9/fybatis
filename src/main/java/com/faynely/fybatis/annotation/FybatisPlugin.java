@@ -9,6 +9,6 @@ import java.lang.annotation.*;
 @Documented
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Plugin {
-
+public @interface FybatisPlugin {
+    String methodName();
 }

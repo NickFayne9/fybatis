@@ -1,9 +1,13 @@
 package com.faynely.fybatis.plugin;
 
+import com.faynely.fybatis.annotation.FybatisPlugin;
+
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -16,29 +20,27 @@ public class PluginProxy implements InvocationHandler {
 
     private Object target;
 
+    private static Set<String> pluginMethodSet = new HashSet<>();
+
     public PluginProxy(Object target, Plugin interceptor) {
         this.target = target;
         this.interceptor = interceptor;
     }
 
     public static Object wrap(Object target, Plugin plugin){
-        Class clazz = target.getClass();
+        //将插件拦截的方法保存至 Set
+        String pluginMethodName = plugin.getClass().getAnnotation(FybatisPlugin.class).methodName();
+        pluginMethodSet.add(pluginMethodName);
 
-        //目前只针对 query 方法进行插件处理
-        Set<Class<?>> interfacesSet = new HashSet<>();
-        Class[] interfaces = clazz.getInterfaces();
-        for(Class tmpClazz : interfaces){
-            //if("query".equals(tmpClazz.getName())){
-                interfacesSet.add(tmpClazz);
-            //}
-        }
-        Class[] newInterfaces = interfacesSet.toArray(new Class[interfacesSet.size()]);
-        return Proxy.newProxyInstance(clazz.getClassLoader(), newInterfaces, new PluginProxy(target, plugin));
+        //生成代理类
+        Class clazz = target.getClass();
+        return Proxy.newProxyInstance(clazz.getClassLoader(), clazz.getInterfaces(), new PluginProxy(target, plugin));
     }
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        if("query".equals(method.getName())){
+        Class clazz = method.getDeclaringClass();
+        if(pluginMethodSet.contains(method.getName())){
             return interceptor.intercept(new Invocation(target, method, args));
         }
         return method.invoke(target, args);

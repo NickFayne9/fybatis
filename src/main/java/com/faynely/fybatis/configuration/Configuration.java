@@ -1,5 +1,6 @@
 package com.faynely.fybatis.configuration;
 
+import com.faynely.fybatis.annotation.FybatisPlugin;
 import com.faynely.fybatis.annotation.Repository;
 import com.faynely.fybatis.annotation.Select;
 import com.faynely.fybatis.binding.MapperData;
@@ -7,7 +8,6 @@ import com.faynely.fybatis.binding.MapperProxy;
 import com.faynely.fybatis.executor.Executor;
 import com.faynely.fybatis.executor.ExecutorFactory;
 import com.faynely.fybatis.plugin.Plugin;
-import com.faynely.fybatis.plugin.PluginProxy;
 import com.faynely.fybatis.sqlsession.SqlSession;
 
 import java.io.File;
@@ -101,7 +101,7 @@ public class Configuration {
         for(String className : classNameList){
             try{
                 Class clazz = Class.forName(className);
-                if(clazz.isAnnotationPresent(com.faynely.fybatis.annotation.Plugin.class)){
+                if(clazz.isAnnotationPresent(FybatisPlugin.class)){
                     pluginList.add((Plugin) clazz.newInstance());
                 }
             }catch (ClassNotFoundException e){
@@ -156,7 +156,7 @@ public class Configuration {
     }
 
     /**
-     * 将 Plugin 作为 Executor 的代理
+     * 将 FybatisPlugin 作为 Executor 的代理
      * @param executorType
      * @return
      */
