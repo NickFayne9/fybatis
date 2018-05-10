@@ -229,3 +229,6 @@ plugin 的作用和拦截器一样。作用于在 Executor 操作数据库时。
 
 2. 调用时，拿到第二次生成的代理类，执行 invoke 方法后，进入 PluginB 的拦截方法中，执行拦截方法代码，回调反射执行第一次生成的代理类的方法。
 3. 这时再次进入 invoke 方法，继而进入 PluginA 的拦截方法中，执行拦截方法代码，回调 Executor 类对应的方法。
+
+具体执行过程请看图片会更清晰。
+![二次插件动态代理过程](https://github.com/NickFayne9/git-resource/raw/master/fybatis/TwoPlugin.png)
